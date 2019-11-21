@@ -7,6 +7,7 @@ const app = require("../app.js");
 const _ = require("lodash");
 const functions = require("../middleware/functions.js");
 const {getSectionsTemplate} = require("../middleware/getSectionsTemplate.js");
+const auth = require("../middleware/auth");
 /* GET users listing. */
 
 router.post('/:sectionName', async function (req,res) {

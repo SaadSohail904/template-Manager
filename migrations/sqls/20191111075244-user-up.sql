@@ -1,7 +1,9 @@
-CREATE TABLE IF NOT EXISTS `alluicomponents` (
+CREATE TABLE IF NOT EXISTS `user` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `type` TEXT NOT NULL,
-  `properties` JSON NOT NULL,
+  `name` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `password` VARCHAR(45) NOT NULL,
+  `role` VARCHAR(45) NOT NULL,
   `createdby` INT NULL,
   `deletedby` INT NULL,
   `updatedby` INT NULL,

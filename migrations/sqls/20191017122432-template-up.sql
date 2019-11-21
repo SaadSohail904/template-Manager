@@ -6,8 +6,8 @@ CREATE TABLE IF NOT EXISTS `template` (
   `createdby` INT NULL,
   `deletedby` INT NULL,
   `updatedby` INT NULL,
-  `createdat` DatETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `deletedat` DatETIME NULL,
-  `updatedat` DatETIME NULL,
+  `createdat` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deletedat` DATETIME NULL,
+  `updatedat` DATETIME NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;

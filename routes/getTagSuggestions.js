@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const functions = require('../middleware/functions');
+const auth = require("../middleware/auth");
 
 /* GET users listing. */
 router.post('/:tag/:tagType', async function(req, res, next) {
@@ -15,7 +16,7 @@ router.post('/:tag/:tagType', async function(req, res, next) {
     }
     res.send(tags);
   } catch (error) {
-    return res.send({statusCode:405, errorMessage:error.message});
+    res.send({statusCode:405, errorMessage:error.message});
   }
 });
 

@@ -6,6 +6,7 @@ const {validateName} = require("../middleware/nameValidate.js");
 const app = require("../app.js");
 const _ = require("lodash");
 const functions = require("../middleware/functions.js");
+const auth = require("../middleware/auth");
 /* GET users listing. */
 
 

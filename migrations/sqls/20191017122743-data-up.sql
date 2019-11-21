@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS `data` (
   `createdby` INT NULL,
   `deletedby` INT NULL,
   `updatedby` INT NULL,
-  `createdat` DatETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `deletedat` DatETIME NULL,
-  `updatedat` DatETIME NULL,
+  `createdat` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `deletedat` DATETIME NULL,
+  `updatedat` DATETIME NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_data_uicomponent1_idx` (`uicomponentid` ASC),
   CONSTRAINT `fk_data_uicomponent1`

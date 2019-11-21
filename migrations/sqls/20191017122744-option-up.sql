@@ -8,9 +8,9 @@ CREATE TABLE IF NOT EXISTS `uicomponentoption` (
   `createdby` INT NULL,
   `updatedby` INT NULL,
   `deletedby` INT NULL,
-  `deletedat` DatETIME NULL,
-  `createdat` DatETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updatedat` DatETIME NULL,
+  `deletedat` DATETIME NULL,
+  `createdat` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedat` DATETIME NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_option_uicomponent1_idx` (`uicomponentid` ASC),
   CONSTRAINT `fk_option_uicomponent1`

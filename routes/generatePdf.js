@@ -4,6 +4,7 @@ const PDFDocument = require('pdfkit');
 const con = require("../db.js");
 const functions = require("../middleware/functions.js");
 const fs = require('fs');
+const auth = require("../middleware/auth");
 
 /* GET home page. */
 router.post('/:filename', function(req, res) {
@@ -389,27 +390,7 @@ router.post('/:filename', function(req, res) {
     doc.end();
     res.send();
     out.on('finish', function() {
-      // what you want to do with the file.
     });
 });
 
-// function sectionsData(section, userInstances){
-//   for(let i = 0; i < section.subsections.length; i++){
-//     sectionsData(section.subsections[i], userInstances);
-//   }
-//   for(let i = 0; i < section.uicomponents.length; i++){
-//      let dataToAdd = _.filter(userInstances, function(obj){
-//        return obj.uicomponentid == section.uicomponents.id;
-//      })
-//      doc.font('Helvetica-Bold').text(`${dataToAdd.label}: `, doc.X+1, doc.Y, {lineBreak:false})
-//      .font('Helvetica').text(dataToAdd.answer, {lineBreak:false, lineGap:20});
-//   }
-//   doc.moveDown();
-//   if(Math.floor(doc.y)>(doc.page.height-250)) {
-//        doc.addPage();
-//        doc.lineWidth(2);
-//        doc.moveTo(0, 40).lineTo(800, 40).stroke();
-//        doc.y = 65;
-//   }
-// }
 module.exports = router;

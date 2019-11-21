@@ -3,6 +3,7 @@ const router = express.Router();
 const functions = require('../middleware/functions');
 const {userDataValidate} = require('../middleware/userDataValidate');
 const con = require("../db.js");
+const auth = require("../middleware/auth");
 
 /* GET home page. */
 router.post('/', function(req, res) {

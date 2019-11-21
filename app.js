@@ -4,7 +4,8 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const con = require('./db.js');
-
+const config = require("config");
+const usersRoute = require("./routes/user");
 const addTemplate = require('./routes/addTemplate');
 const addUserInstance = require('./routes/addUserInstance');
 const generatePdf = require('./routes/generatePdf');
@@ -14,8 +15,37 @@ const getTemplateBySection = require('./routes/getTemplateBySection');
 const sectionSearch = require('./routes/sectionSearch');
 const templateSearch = require('./routes/templateSearch');
 const updateUserInstance = require('./routes/updateUserInstance');
+var acl = require('express-acl');
+const {auth} = require("./middleware/auth.js");
+const {authRouter} = require("./middleware/auth.js");
 
 const app = express();
+
+acl.config({
+    defaultRole: "user"
+});
+
+let configObject = {
+  filename: 'nacl.json'
+};
+
+let responseObject = {
+  status: 'Access Denied',
+  message: 'You are not authorized to access this resource'
+};
+
+acl.config(configObject, responseObject);
+
+if (!config.get("myprivatekey")) {
+  console.error("FATAL ERROR: myprivatekey is not defined.");
+  process.exit(1);
+}
+else{
+  console.log("Set key");
+}
+
+app.use(auth);
+app.use(acl.authorize);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -25,40 +55,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-
-// app.use(function (req, res, next) { //allow cross origin requests
-//add any token authentication
-    // let allowedOrigins = [
-    //     'http://127.0.0.1',
-    //     'http://localhost',
-    //     'http://127.0.0.1:4200',
-    //     'http://localhost:4200',
-    //     'http://tableegh.org:4200'
-    // ];
-    // let origin = req.headers.origin;
-    // console.log("requested -------------------------",req.headers);
-
-    // if (allowedOrigins.indexOf(origin) > -1) {
-    //      res.end(403, 'Remote host is not allowed to use the API')
-    // }
-
-    // res.header('Access-Control-Allow-Credentials', true);
-    // res.setHeader("Access-Control-Allow-Methods", "POST, PUT, OPTIONS, DELETE, GET");
-    // res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    // next();
-// });
-
 app.use(express.static(path.join(__dirname, 'public')));
-
-//checking if a user is logged in ----------------------------------
-// let myLogger = function (req, res, next) {
-//     if (req.session.user) {
-//         next();
-//     } else {
-//         return res.json({ 'status': 404, 'message': "Please Login" });
-//     }
-// }
-//checking if a user is logged in ends ------------------------------
 
 app.use('/addTemplate', addTemplate);
 app.use('/addUserInstance', addUserInstance);
@@ -69,9 +66,11 @@ app.use('/getTemplateBySection', getTemplateBySection);
 app.use('/sectionSearch', sectionSearch);
 app.use('/templateSearch', templateSearch);
 app.use('/updateUserInstance', updateUserInstance);
+app.use("/api/users", usersRoute);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
+
 });
 
 // error handler
@@ -84,8 +83,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-//////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////
 
 testData();
 

@@ -3,14 +3,16 @@ const router = express.Router();
 const functions = require("../middleware/functions")
 const {templateValidate} = require("../middleware/templateValidate");
 const con = require("../db.js");
+const auth = require("../middleware/auth");
 
 
 
 /* GET home page. */
-router.post('/',function(req, res) {
+router.post('/', function(req, res) {
   con.beginTransaction(async function(err) {
     try {
       template=req.body;
+      console.log(req.body);
       if (err) { throw err; }
       let validated = templateValidate(template);
       let tagsuggestions={
@@ -39,11 +41,11 @@ router.post('/',function(req, res) {
         template.rollback = false;
         res.send(template);
       } else {
-        return res.send({statusCode: 405, errorMessage: validated.error.message });
+        res.send({statusCode: 405, errorMessage: validated.error.message });
       }
     } catch (error) {
       con.rollback();
-      return res.send({statusCode: 405, errorMessage: error.message, rollback:"true"});
+      res.send({statusCode: 405, errorMessage: error.message, rollback:"true"});
     }
   })
 });
