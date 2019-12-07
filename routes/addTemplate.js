@@ -12,30 +12,35 @@ router.post('/', function(req, res) {
   con.beginTransaction(async function(err) {
     try {
       template=req.body;
-      console.log(req.body);
       if (err) { throw err; }
       let validated = templateValidate(template);
-      let tagsuggestions={
-        tags: ""
-      };
-      let templateid = 0;
+      // let tagsuggestions={
+      //   tags: ""
+      // };
+      let template_id = 0;
       if(!validated.error){
-        let query = `Insert into template(name, tags) values ("${template.templateName}", "${template.templateTags}")`;
-        let templateTags = template.templateTags.split(",");
-        for(let i=0; i<templateTags.length; i++){
-          tagsuggestions.tags+=`('${template.templateName}', 'template', '${templateTags[i]}'),`;
-        }
+        let query = `Insert into template(name, tags, default_columns, public) values ("${template.template_name}", "${template.template_tags}", ${template.default_columns}, ${template.public})`;
+        // let templateTags = template.templateTags.split(",");
+        // for(let i=0; i<templateTags.length; i++){
+        //   tagsuggestions.tags+=`('${template.templateName}', 'template', '${templateTags[i]}'),`;
+        // }
         queryResults = await functions.runQuery(query);
-        template.templateid = queryResults.insertId;
+        template.template_id = queryResults.insertId;
         if(template.sections.length > 0){
           for(let i = 0; i < template.sections.length; i++){
-            template.sections[i] = await insertSections(template.sections[i], template.templateid, null, tagsuggestions);
+            let sectionId = template.sections[i].section_id;
+            template.sections[i] = await insertSections(template.sections[i], template.template_id);
+            for(let j = 0; j<template.sections.length;j++){
+              if(template.sections[j].parent_section_id==sectionId){
+                template.sections[j].parent_section_id = template.sections[i].section_id;
+              }
+            }
           }
-          tagsuggestions.tags = tagsuggestions.tags.slice(0, -1);
-          if(tagsuggestions.tags.length > 0){
-            query = `Insert ignore into tagsuggestions(name, type, tagsuggestion) values ${tagsuggestions.tags}`;
-            await functions.runQuery(query);
-          }
+          // tagsuggestions.tags = tagsuggestions.tags.slice(0, -1);
+          // if(tagsuggestions.tags.length > 0){
+          //   query = `Insert ignore into tagsuggestions(name, type, tagsuggestion) values ${tagsuggestions.tags}`;
+          //   await functions.runQuery(query);
+          // }
         }
         con.commit();
         template.rollback = false;
@@ -50,44 +55,32 @@ router.post('/', function(req, res) {
   })
 });
 
-async function insertSections(section, templateid, parentsectionid, tagsuggestions){
-  let query = `Insert into section(name, tags, templateid, properties, parentsectionid) values('${section.sectionName}',' ${section.sectionTags}', ${templateid}, '${section.sectionProperties}', ${parentsectionid})`;
-  let sectionTags = section.sectionTags.split(",");
-  for(let i=0; i<sectionTags.length; i++){
-    tagsuggestions.tags+=`('${section.sectionName}', 'section', '${sectionTags[i]}'),`;
-  }
+async function insertSections(section, template_id){
+  section.section_properties = JSON.stringify(section.section_properties);
+  if(section.parent_section_id==0) section.parent_section_id = null;
+  let query = `Insert into section(name, section_title, tags, template_id, properties, parent_section_id, type, created_by) values('${section.section_name}', '${section.section_title}', '${section.section_tags}', ${template_id}, '${section.section_properties}', ${section.parent_section_id}, ${section.type}, ${section.created_by})`;
+  console.log(query);
+  // let section_tags = section.section_tags.split(",");
+  // for(let i=0; i<section_tags.length; i++){
+  //   tagsuggestions.tags+=`('${section.section_name}', 'section', '${section_tags[i]}'),`;
+  // }
   let queryResults = await functions.runQuery(query);
-  section.sectionid = queryResults.insertId;
-  section.parentsectionid = parentsectionid;
-  for(let j = 0; j < section.uicomponents.length; j++){
-    section.uicomponents[j] = await insertuicomponents(section.uicomponents[j], section.sectionid, tagsuggestions);
-  }
-  for(let i = 0; i < section.subsections.length; i++){
-    section.subsections[i] = await insertSections(section.subsections[i], templateid, section.sectionid, tagsuggestions);
+  section.section_id = queryResults.insertId;
+  for(let j = 0; j < section.ui_components.length; j++){
+    section.ui_components[j] = await insertUIComponents(section.ui_components[j], section.section_id);
   }
   return section;
 }
 
-async function insertuicomponents(uicomponent, sectionid, tagsuggestions){
-  let query = `Insert into uicomponent(title, type, tags, properties, sectionid) values('${uicomponent.uicomponentTitle}', '${uicomponent.uicomponentType}', '${uicomponent.uicomponentTags}', '${uicomponent.uicomponentProperties}', ${sectionid})`;
+async function insertUIComponents(ui_components, section_id){
+  ui_components.ui_components_properties = JSON.stringify(ui_components.ui_components_properties);
+  let query = `Insert into ui_component(statement, type, tags, properties, section_id, created_by) values('${ui_components.ui_components_statement}', '${ui_components.ui_components_type}', '${ui_components.ui_components_tags}', '${ui_components.ui_components_properties}', ${section_id}, ${ui_components.created_by})`;
+  console.log(query);
   let queryResults = await functions.runQuery(query);
-  let uicomponentTags = uicomponent.uicomponentTags.split(",");
-  for(let i=0; i<uicomponentTags.length; i++){
-    tagsuggestions.tags+=`('${uicomponent.uicomponentTitle}', 'uicomponent', '${uicomponentTags[i]}'),`;
-  }
-  uicomponent.uicomponentid = queryResults.insertId;
-  await insertuicomponentOptions(uicomponent, uicomponent.uicomponentid);
-  return uicomponent;
-}
-async function insertuicomponentOptions(uicomponent, uicomponentid){
-  let optionsToAdd = "";
-  for(let i = 0; i<uicomponent.uicomponentOptions.length; i++){
-    optionsToAdd += `("${uicomponent.uicomponentOptions[i].text}", ${uicomponentid}),`
-  }
-  optionsToAdd = optionsToAdd.slice(0, -1);
-  if(optionsToAdd.length>1){
-    let query = `Insert into uicomponentoption(text, uicomponentid) values ${optionsToAdd}`;
-    let queryResults = await functions.runQuery(query);
-  }
+  // let ui_componentsTags = ui_components.ui_componentsTags.split(",");
+  // for(let i=0; i<ui_componentsTags.length; i++){
+  //   tagsuggestions.tags+=`('${ui_components.ui_componentsTitle}', 'ui_components', '${ui_componentsTags[i]}'),`;
+  // }
+  return ui_components;
 }
 module.exports = router;
