@@ -11,7 +11,7 @@
     "bcrypt": "^3.0.6",
     "body-parser": "^1.19.0",
     "clean-css": "^4.2.1",
-    "config": "^3.2.4",
+    "config": "^3.3.8",
     "constantinople": "^4.0.1",
     "cookie-parser": "~1.4.3",
     "db-migrate": "^0.11.6",
@@ -29,7 +29,7 @@
     "nodemon": "^1.19.3",
     "pdfkit": "^0.10.0",
     "pug": "^2.0.4",
-    "tap": "^14.6.9"
+    "tap": "^14.11.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
